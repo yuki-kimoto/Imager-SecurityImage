@@ -13,6 +13,16 @@ use List::Util qw(shuffle);
 my $width  = 250; # CAPTCHA の幅
 my $height = 50;  # CAPTCHA の高さ
 
+sub _get_font_file {
+  my $self = shift;
+  
+  my $module_file = $INC{'Imager/SecurityImage.pm'};
+  $module_file =~ s/\.pm$//;
+  my $font_file = $module_file . '/Vera.ttf';
+  
+  return $font_file;
+}
+
 sub random {
   my $self = shift;
   
@@ -73,9 +83,10 @@ sub write_security_image_to_file {
       aa => 1,
     );
   }
-
+  
+  my $font_file = $self->_get_font_file;
   my $font = Imager::Font->new(
-    file => '/usr/share/fonts/bitstream-vera/Vera.ttf',
+    file => $font_file,
     size => 35,
     aa   => 1,
     type => 'ft2',

@@ -8,5 +8,6 @@ BEGIN {
 
 my $sec_image = Imager::SecurityImage->new;
 
-$sec_image->write_security_image_to_file('t/cap.png');
+$DB::single = 1;
 
+$sec_image->write_security_image_to_file('t/cap.png');
