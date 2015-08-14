@@ -10,76 +10,33 @@ use Imager::Font;
 use Imager::Matrix2d;
 use List::Util qw(shuffle);
 
-my $width  = 250; # CAPTCHA の幅
-my $height = 50;  # CAPTCHA の高さ
-
-sub _get_font_file {
-  my $self = shift;
-  
-  my $module_file = $INC{'Imager/SecurityImage.pm'};
-  $module_file =~ s/\.pm$//;
-  my $font_file = $module_file . '/Vera.ttf';
-  
-  return $font_file;
-}
-
-sub random {
-  my $self = shift;
-  
-  my($min, $max) = sort { $a <=> $b } @_;
-  return floor($min + rand($max - $min + 1));
-}
-
-sub random_color {
-  my $self = shift;
-  
-  my($color_a, $color_b) = @_;
-  my @rgb_a = map { hex $_ }
-    $color_a =~ /^\#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})/i;
-  my @rgb_b = map { hex $_ }
-    $color_b =~ /^\#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})/i;
-  my $r = $self->random($rgb_a[0], $rgb_b[0]);
-  my $g = $self->random($rgb_a[1], $rgb_b[1]);
-  my $b = $self->random($rgb_a[2], $rgb_b[2]);
-  return sprintf '#%02x%02x%02x', $r, $g, $b;
-}
-
-sub random_char {
-  my $self = shift;
-  
-  my($min, $max) = @_;
-  my $length = $self->random($min, $max);
-  my @chr = ();
-  push @chr, map { chr($_) } (ord('a') .. ord('z'));
-  push @chr, map { chr($_) } (ord('A') .. ord('Z'));
-  push @chr, map { chr($_) } (ord('0') .. ord('9'));
-  return join '', (shuffle(@chr))[0 .. $length - 1];
-}
-
 sub write_security_image_to_file {
   my ($self, $file) = @_;
 
+  my $width  = 250; # CAPTCHA height
+  my $height = 50;  # CAPTCHA width
+
   # CAPTCHA
   my $imager = Imager->new(xsize => $width, ysize => $height);
-  $imager->box(filled => 1, color => $self->random_color('#cccccc', '#ffffff'));
+  $imager->box(filled => 1, color => $self->_random_color('#cccccc', '#ffffff'));
 
-  for (1 .. $self->random(200, 300)) {
+  for (1 .. $self->_random(200, 300)) {
     $imager->setpixel(
-      x => $self->random(0, $width - 1),
-      y => $self->random(0, $height - 1),
-      color => $self->random_color('#000000', '#666666'),
+      x => $self->_random(0, $width - 1),
+      y => $self->_random(0, $height - 1),
+      color => $self->_random_color('#000000', '#666666'),
     );
   }
 
   $imager->filter(type => 'gaussian', stddev => 0.5);
 
-  for (1 .. $self->random(3, 5)) {
+  for (1 .. $self->_random(3, 5)) {
     $imager->line(
-      color => $self->random_color('#000000', '#666666'),
-      x1 => $self->random(0, $width - 1),
-      y1 => $self->random(0, $height - 1),
-      x2 => $self->random(0, $width - 1),
-      y2 => $self->random(0, $height - 1),
+      color => $self->_random_color('#000000', '#666666'),
+      x1 => $self->_random(0, $width - 1),
+      y1 => $self->_random(0, $height - 1),
+      x2 => $self->_random(0, $width - 1),
+      y2 => $self->_random(0, $height - 1),
       aa => 1,
     );
   }
@@ -95,7 +52,7 @@ sub write_security_image_to_file {
   my $word;
   my $bbox;
   while (1) {
-    $word = $self->random_char(5, 10);
+    $word = $self->_random_char(5, 10);
     $bbox = $font->bounding_box(string => $word);
     next if $bbox->total_width >= $width;
     last;
@@ -107,13 +64,13 @@ sub write_security_image_to_file {
     
     # Hineri
     my $matrix = Imager::Matrix2d->shear(
-      x => ($self->random(-3, 3) / 10),
-      y => ($self->random(-3, 3) / 10),
+      x => ($self->_random(-3, 3) / 10),
+      y => ($self->_random(-3, 3) / 10),
     );
     $font->transform(matrix => $matrix);
     
     # Height is random
-    my $y = $self->random(10, floor($height - $bbox->font_height) * 2 - 10);
+    my $y = $self->_random(10, floor($height - $bbox->font_height) * 2 - 10);
     $imager->string(
       align  => 0,
       x      => $x,
@@ -121,18 +78,18 @@ sub write_security_image_to_file {
       halign => 'center',
       string => $char,
       font   => $font,
-      color  => $self->random_color('#000000', '#666666'),
+      color  => $self->_random_color('#000000', '#666666'),
     );
     $x += $bbox->total_width;
   }
 
-  for (1 .. $self->random(10, 15)) {
-    my $angle = $self->random(0, 360);
-    my $x = $self->random(0, $width);
-    my $y = $self->random(0, $height);
-    my $radius = $self->random(0, $width - $x);
+  for (1 .. $self->_random(10, 15)) {
+    my $angle = $self->_random(0, 360);
+    my $x = $self->_random(0, $width);
+    my $y = $self->_random(0, $height);
+    my $radius = $self->_random(0, $width - $x);
     $imager->arc(
-      color => $self->random_color('#000000', '#666666'),
+      color => $self->_random_color('#000000', '#666666'),
       x     => $x,
       y     => $y,
       r     => $radius,
@@ -143,6 +100,49 @@ sub write_security_image_to_file {
   }
 
   $imager->write(file => $file, type => 'png');
+}
+
+sub _get_font_file {
+  my $self = shift;
+  
+  my $module_file = $INC{'Imager/SecurityImage.pm'};
+  $module_file =~ s/\.pm$//;
+  my $font_file = $module_file . '/Vera.ttf';
+  
+  return $font_file;
+}
+
+sub _random {
+  my $self = shift;
+  
+  my($min, $max) = sort { $a <=> $b } @_;
+  return floor($min + rand($max - $min + 1));
+}
+
+sub _random_color {
+  my $self = shift;
+  
+  my($color_a, $color_b) = @_;
+  my @rgb_a = map { hex $_ }
+    $color_a =~ /^\#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})/i;
+  my @rgb_b = map { hex $_ }
+    $color_b =~ /^\#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})/i;
+  my $r = $self->_random($rgb_a[0], $rgb_b[0]);
+  my $g = $self->_random($rgb_a[1], $rgb_b[1]);
+  my $b = $self->_random($rgb_a[2], $rgb_b[2]);
+  return sprintf '#%02x%02x%02x', $r, $g, $b;
+}
+
+sub _random_char {
+  my $self = shift;
+  
+  my($min, $max) = @_;
+  my $length = $self->_random($min, $max);
+  my @chr = ();
+  push @chr, map { chr($_) } (ord('a') .. ord('z'));
+  push @chr, map { chr($_) } (ord('A') .. ord('Z'));
+  push @chr, map { chr($_) } (ord('0') .. ord('9'));
+  return join '', (shuffle(@chr))[0 .. $length - 1];
 }
 
 =head1 NAME
