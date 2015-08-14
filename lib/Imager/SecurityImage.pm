@@ -9,6 +9,30 @@ use Imager;
 use Imager::Font;
 use Imager::Matrix2d;
 use List::Util qw(shuffle);
+use File::Temp ();
+use Carp 'croak';
+
+sub get_security_image_data {
+  my $self = shift;
+  
+  my $tmp_dir = File::Temp->newdir;
+  my $tmp_file = "$tmp_dir/tmp.png";
+  
+  # Write security image data to temp file
+  open my $out_fh, '>', $tmp_file
+    or croak "Can't open file $tmp_file for write: $!";
+  $self->write_security_image_to_file($tmp_file);
+  close $out_fh;
+  
+  # Read security image data from temp file
+  open my $in_fh, '<', $tmp_file
+    or croak "Can't open file $tmp_file for read: $!";
+  binmode($in_fh);
+  my $security_image_data = do { local $/; <$in_fh> };
+  close $in_fh;
+  
+  return $security_image_data;
+}
 
 sub write_security_image_to_file {
   my ($self, $file) = @_;
