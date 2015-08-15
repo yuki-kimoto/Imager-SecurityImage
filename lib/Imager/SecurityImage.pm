@@ -11,6 +11,7 @@ use Imager::Matrix2d;
 use List::Util qw(shuffle);
 use File::Temp ();
 use Carp 'croak';
+use Image::PNG::Simple;
 
 sub get_security_image_data {
   my $self = shift;
@@ -122,8 +123,24 @@ sub write_security_image_to_file {
       aa    => 1,
     );
   }
-
-  $imager->write(file => $file, type => 'png');
+  
+  if ($Imager::formats{'png'}) {
+    $imager->write(file => $file, type => 'png');
+  }
+  else {
+    my $tmp_dir = File::Temp->newdir;
+    my $tmp_file = "$tmp_dir/tmp.bmp";
+    
+    # Write bmp data to temp file
+    open my $out_fh, '>', $tmp_file
+      or croak "Can't open file $tmp_file for write: $!";
+    $imager->write(file => $tmp_file, type => 'bmp');
+    close $out_fh;
+    
+    my $ips = Image::PNG::Simple->new;
+    $ips->read_bmp_file($tmp_file);
+    $ips->write_png_file($file);
+  }
 }
 
 sub _get_font_file {
@@ -171,7 +188,13 @@ sub _random_char {
 
 =head1 NAME
 
-Imager::SecurityImage - The great new Imager::SecurityImage!
+Imager::SecurityImage - Create Security Image(CAPTCHA) by Imager without C library dependency
+
+=head1 DESCRIPTION
+
+Imager::SecurityImage create Create Security Image(CAPTCHA) by Imager without C library dependency.
+
+You don't need libpng to create security image.
 
 =head1 VERSION
 
@@ -188,13 +211,15 @@ Quick summary of what the module does.
 
 Perhaps a little code snippet.
 
-    use Imager::SecurityImage;
-
-    my $sec_image = Imager::SecurityImage->new();
-    
-    # Image data
-    my $image_data = $sec_image->get_security_image;
-    
+  use Imager::SecurityImage;
+  
+  my $sec_image = Imager::SecurityImage->new();
+  
+  # Get security image data
+  my $image_data = $sec_image->get_security_image_data;
+  
+  # Write security image to file
+  my $image_data = $sec_image->write_security_image_to_file;
 
 =head1 EXPORT
 
@@ -203,49 +228,31 @@ if you don't export anything, such as for a purely object-oriented module.
 
 =head1 METHODS
 
+=head2 get_security_image_data
+
+my $image_data = $sec_image->get_security_image_data;
+
+Get security image data. Image is PNG format.
+
+=head2 write_security_image_to_file
+
+$sec_image->write_security_image_to_file('security.png');
+
+Write security image to file. Image is PNG format.
+
+=head2 
+
+my $image_
+
 =head1 AUTHOR
 
 Yuki Kimoto, C<< <kimoto.yuki at gmail.com> >>
 
 =head1 BUGS
 
-Please report any bugs or feature requests to C<bug-imager-securityimage at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Imager-SecurityImage>.  I will be notified, and then you'll
-automatically be notified of progress on your bug as I make changes.
+Please report any bugs or feature request to Github issue.
 
-
-=head1 SUPPORT
-
-You can find documentation for this module with the perldoc command.
-
-    perldoc Imager::SecurityImage
-
-
-You can also look for information at:
-
-=over 4
-
-=item * RT: CPAN's request tracker (report bugs here)
-
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Imager-SecurityImage>
-
-=item * AnnoCPAN: Annotated CPAN documentation
-
-L<http://annocpan.org/dist/Imager-SecurityImage>
-
-=item * CPAN Ratings
-
-L<http://cpanratings.perl.org/d/Imager-SecurityImage>
-
-=item * Search CPAN
-
-L<http://search.cpan.org/dist/Imager-SecurityImage/>
-
-=back
-
-
-=head1 ACKNOWLEDGEMENTS
-
+L<https://github.com/yuki-kimoto/Imager-SecurityImage>
 
 =head1 LICENSE AND COPYRIGHT
 

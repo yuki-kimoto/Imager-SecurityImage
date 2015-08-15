@@ -18,7 +18,8 @@ WriteMakefile(
         'Test::More' => 0,
     },
     PREREQ_PM => {
-        'Image::PNG::Simple' => '0.07'
+        'Image::PNG::Simple' => '0.07',
+        'Object::Simple' => '3.14'
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => 'Imager-SecurityImage-*' },
