@@ -92,14 +92,14 @@ sub write_security_image_to_file {
   for my $char (split //, $word) {
     my $bbox = $font->bounding_box(string => $char);
     
-    # Hineri
+    # Shear
     my $matrix = Imager::Matrix2d->shear(
       x => ($self->_random(-3, 3) / 10),
       y => ($self->_random(-3, 3) / 10),
     );
     $font->transform(matrix => $matrix);
     
-    # Height is random
+    # y position is random
     my $y = $self->_random(10, floor($height - $bbox->font_height) * 2 - 10);
     $imager->string(
       align  => 0,
@@ -187,11 +187,8 @@ sub _random_color {
 sub _random_char {
   my ($self, $length) = @_;
   
-  my @chr = ();
-  push @chr, map { chr($_) } (ord('a') .. ord('z'));
-  push @chr, map { chr($_) } (ord('A') .. ord('Z'));
-  push @chr, map { chr($_) } (ord('0') .. ord('9'));
-  return join '', (shuffle(@chr))[0 .. $length - 1];
+  my @char = ('a' .. 'z', 'A' .. 'Z', '0' .. '9');
+  return join '', (shuffle(@char))[0 .. $length - 1];
 }
 
 =head1 NAME
