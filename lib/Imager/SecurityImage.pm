@@ -84,14 +84,11 @@ sub write_security_image_to_file {
 
   my $word;
   my $bbox;
-  while (1) {
-    $word = $self->_random_char(8);
-    $bbox = $font->bounding_box(string => $word);
-    next if $bbox->total_width >= $width;
-    last;
-  }
 
-  my $x = floor(($width - $bbox->total_width) / 2);
+  $word = $self->_random_char(8);
+  $bbox = $font->bounding_box(string => $word);
+
+  my $x = floor(($width - $bbox->display_width) / 2);
   for my $char (split //, $word) {
     my $bbox = $font->bounding_box(string => $char);
     
@@ -113,7 +110,7 @@ sub write_security_image_to_file {
       font   => $font,
       color  => $self->_random_color('#000000', '#666666'),
     );
-    $x += $bbox->total_width;
+    $x += $bbox->display_width;
   }
 
   for (1 .. $self->_random(10, 15)) {
