@@ -99,12 +99,14 @@ sub write_security_image_to_file {
     $font->transform(matrix => $matrix);
     
     # y position is random
-    my $y = $self->_random(10, floor($height - $bbox->font_height) * 2 - 10);
+    my $y_base = floor(($height - $bbox->text_height) / 2);
+    my $y = $self->_random($y_base - 5, $y_base + 5);
     $imager->string(
       align  => 0,
       x      => $x,
       y      => $y,
       halign => 'center',
+      valign => 'center',
       string => $char,
       font   => $font,
       color  => $self->_random_color('#000000', '#666666'),
