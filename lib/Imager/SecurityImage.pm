@@ -85,7 +85,7 @@ sub write_security_image_to_file {
   my $word;
   my $bbox;
   while (1) {
-    $word = $self->_random_char(5, 10);
+    $word = $self->_random_char(8);
     $bbox = $font->bounding_box(string => $word);
     next if $bbox->total_width >= $width;
     last;
@@ -188,10 +188,8 @@ sub _random_color {
 }
 
 sub _random_char {
-  my $self = shift;
+  my ($self, $length) = @_;
   
-  my($min, $max) = @_;
-  my $length = $self->_random($min, $max);
   my @chr = ();
   push @chr, map { chr($_) } (ord('a') .. ord('z'));
   push @chr, map { chr($_) } (ord('A') .. ord('Z'));
