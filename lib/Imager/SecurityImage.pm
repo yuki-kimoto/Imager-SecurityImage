@@ -83,12 +83,11 @@ sub write_security_image_to_file {
   );
 
   my $word;
-  my $bbox;
-
+  my $bbox_string;
   $word = $self->_random_char(8);
-  $bbox = $font->bounding_box(string => $word);
-
-  my $x = floor(($width - $bbox->display_width) / 2);
+  $bbox_string = $font->bounding_box(string => $word);
+  
+  my $x = floor(($width - $bbox_string->display_width) / 2);
   for my $char (split //, $word) {
     my $bbox = $font->bounding_box(string => $char);
     
@@ -112,7 +111,8 @@ sub write_security_image_to_file {
     );
     $x += $bbox->display_width;
   }
-
+  
+  # Draw some noise
   for (1 .. $self->_random(10, 15)) {
     my $angle = $self->_random(0, 360);
     my $x = $self->_random(0, $width);
