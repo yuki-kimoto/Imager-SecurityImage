@@ -13,6 +13,9 @@ use File::Temp ();
 use Carp 'croak';
 use Image::PNG::Simple;
 
+has width => 250;
+has height => 50;
+
 sub get_security_image_data {
   my $self = shift;
   
@@ -37,14 +40,18 @@ sub get_security_image_data {
 
 sub write_security_image_to_file {
   my ($self, $file) = @_;
+  
+  # Width
+  my $width  = $self->width;
+  
+  # Height
+  my $height = $self->height;
 
-  my $width  = 250; # CAPTCHA height
-  my $height = 50;  # CAPTCHA width
-
-  # CAPTCHA
+  # Create image frame
   my $imager = Imager->new(xsize => $width, ysize => $height);
   $imager->box(filled => 1, color => $self->_random_color('#cccccc', '#ffffff'));
-
+  
+  # Draw random points
   for (1 .. $self->_random(200, 300)) {
     $imager->setpixel(
       x => $self->_random(0, $width - 1),
@@ -52,9 +59,9 @@ sub write_security_image_to_file {
       color => $self->_random_color('#000000', '#666666'),
     );
   }
-
+  
+  # Draw random lines
   $imager->filter(type => 'gaussian', stddev => 0.5);
-
   for (1 .. $self->_random(3, 5)) {
     $imager->line(
       color => $self->_random_color('#000000', '#666666'),
@@ -66,6 +73,7 @@ sub write_security_image_to_file {
     );
   }
   
+  # Create font
   my $font_file = $self->_get_font_file;
   my $font = Imager::Font->new(
     file => $font_file,
@@ -201,20 +209,11 @@ Imager::SecurityImage create Create Security Image(CAPTCHA) by Imager without C 
 
 You don't need libpng to create security image.
 
-=head1 VERSION
-
-Version 0.01
-
 =cut
 
 our $VERSION = '0.01';
 
-
 =head1 SYNOPSIS
-
-Quick summary of what the module does.
-
-Perhaps a little code snippet.
 
   use Imager::SecurityImage;
   
@@ -226,10 +225,21 @@ Perhaps a little code snippet.
   # Write security image to file
   my $image_data = $sec_image->write_security_image_to_file;
 
-=head1 EXPORT
+=head1 ATTRIBUTES
 
-A list of functions that can be exported.  You can delete this section
-if you don't export anything, such as for a purely object-oriented module.
+=head2 width
+
+  $sec_image->width(300);
+  my $width = $sec_image->width(300);
+
+Security image width, default to C<250>.
+
+=head2 height
+  
+  $sec_image->height(100);
+  my $heigth = $sec_image->height(100);
+
+Security image height, default to C<50>.
 
 =head1 METHODS
 
@@ -244,10 +254,6 @@ Get security image data. Image is PNG format.
 $sec_image->write_security_image_to_file('security.png');
 
 Write security image to file. Image is PNG format.
-
-=head2 
-
-my $image_
 
 =head1 AUTHOR
 
