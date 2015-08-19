@@ -157,6 +157,11 @@ sub _random {
   my $self = shift;
   
   my($min, $max) = sort { $a <=> $b } @_;
+  
+  if ($ENV{IMAGER_SECURITY_IMAGE_TEST_SRAND}) {
+    srand($ENV{IMAGER_SECURITY_IMAGE_TEST_SRAND});
+  }
+  
   return floor($min + rand($max - $min + 1));
 }
 
