@@ -15,6 +15,7 @@ use Image::PNG::Simple;
 
 has width => 250;
 has height => 50;
+has font_size => 35;
 
 sub get_security_image_data {
   my $self = shift;
@@ -75,9 +76,10 @@ sub write_security_image_to_file {
   
   # Create font
   my $font_file = $self->_get_font_file;
+  my $font_size = $self->font_size;
   my $font = Imager::Font->new(
     file => $font_file,
-    size => 35,
+    size => $font_size,
     aa   => 1,
     type => 'ft2',
   );
@@ -211,27 +213,41 @@ our $VERSION = '0.01';
 
   use Imager::SecurityImage;
   
-  my $sec_image = Imager::SecurityImage->new();
+  my $sec_image = Imager::SecurityImage->new;
   
   # Get security image data
   my $image_data = $sec_image->get_security_image_data;
   
   # Write security image to file
   my $image_data = $sec_image->write_security_image_to_file;
+  
+  # You can set width, heigth, and font size
+  my $sec_image = Imager::SecurityImage->new;
+  $sec_image->width(500);
+  $sec_image->height(60);
+  $sec_image->font_size(40);
+  my $image_data = $sec_image->get_security_image_data;
 
 =head1 ATTRIBUTES
+
+=head2 font_size
+
+  $sec_image->font_size(40);
+  my $font_size = $sec_image->font_size;
+
+Security image width, default to C<250>.
 
 =head2 width
 
   $sec_image->width(300);
-  my $width = $sec_image->width(300);
+  my $width = $sec_image->width;
 
 Security image width, default to C<250>.
 
 =head2 height
   
   $sec_image->height(100);
-  my $heigth = $sec_image->height(100);
+  my $heigth = $sec_image->height;
 
 Security image height, default to C<50>.
 

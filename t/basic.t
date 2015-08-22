@@ -56,4 +56,22 @@ $ENV{IMAGER_SECURITY_IMAGE_TEST_SRAND} = 100;
   }
 }
 
+# width, height, font_size
+{
+  my $tmp_dir = File::Temp->newdir;
+  my $sec_image = Imager::SecurityImage->new;
+  $sec_image->width(500);
+  $sec_image->height(60);
+  $sec_image->font_size(40);
+  my $security_image_data = $sec_image->get_security_image_data;
+
+  my $expected_file = "$FindBin::Bin/images/sec2.png";
+  if ($security_image_data eq slurp($expected_file)) {
+    pass;
+  }
+  else {
+    fail;
+  }
+}
+
 1;
