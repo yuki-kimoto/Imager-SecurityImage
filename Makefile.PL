@@ -18,6 +18,7 @@ WriteMakefile(
         'Test::More' => 0,
     },
     PREREQ_PM => {
+        'Imager' => '1.003',
         'Image::PNG::Simple' => '0.07',
         'Object::Simple' => '3.14'
     },
